@@ -12,22 +12,38 @@
 
     <script>
         document.getElementById('sendReport').addEventListener('click', function() {
+            document.getElementById('status').innerText = 'Sending report...';
+
             fetch('https://api.github.com/repos/moroii69/autosend_reports_jLOG/actions/workflows/daily_report.yml/dispatches', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer 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',
-                    'Accept': 'application/vnd.github.v3+json'
+                    'Authorization': 'Bearer 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', // Replace with your actual token
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    ref: 'main'  // Adjust if your default branch is different
+                    ref: 'main'  // Ensure this matches your default branch
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else if (response.status === 404) {
+                    throw new Error('Workflow file not found. Please check the file name and path.');
+                } else if (response.status === 401) {
+                    throw new Error('Unauthorized. Check your GitHub token and permissions.');
+                } else if (response.status === 403) {
+                    throw new Error('Forbidden. You might not have permissions to trigger this workflow.');
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
             .then(data => {
                 document.getElementById('status').innerText = 'Report sent successfully!';
             })
             .catch(error => {
-                document.getElementById('status').innerText = 'Error sending report.';
+                document.getElementById('status').innerText = 'Error sending report: ' + error.message;
+                console.error('Error details:', error); // Log the error details to the console
             });
         });
     </script>
