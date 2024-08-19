@@ -21,10 +21,6 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Generate report
+    - name: Run generate_report.py
       run: |
         python generate_report.py
-
-    - name: Send report
-      run: |
-        python send_report_email.py
