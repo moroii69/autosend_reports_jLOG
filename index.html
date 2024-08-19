@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Report</title>
+</head>
+<body>
+    <h1>Send Report</h1>
+    <button id="sendReport">Send Report</button>
+    <p id="status"></p>
+
+    <script>
+        document.getElementById('sendReport').addEventListener('click', function() {
+            fetch('https://api.github.com/repos/moroii69/autosend_reports_jLOG/actions/workflows/daily_report.yml/dispatches', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer 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',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify({
+                    ref: 'main'  // Adjust if your default branch is different
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').innerText = 'Report sent successfully!';
+            })
+            .catch(error => {
+                document.getElementById('status').innerText = 'Error sending report.';
+            });
+        });
+    </script>
+</body>
+</html>
