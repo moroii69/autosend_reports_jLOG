@@ -34,6 +34,8 @@
                     throw new Error('Unauthorized. Check your GitHub token and permissions.');
                 } else if (response.status === 403) {
                     throw new Error('Forbidden. You might not have permissions to trigger this workflow.');
+                } else if (response.status === 422) {
+                    throw new Error('Unprocessable Entity. Check your request body.');
                 } else {
                     return response.text().then(text => { throw new Error(text); });
                 }
